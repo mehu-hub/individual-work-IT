@@ -6,6 +6,11 @@ import { usePathname } from "next/navigation";
 import { navSections } from "@/data/navigation";
 import { Button } from "@/components/ui/button";
 import { X, ChevronDown } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,17 +20,11 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
-  // Track which sections are expanded; default all open
-  const [expanded, setExpanded] = useState<Record<string, boolean>>(
-    () =>
-      Object.fromEntries(navSections.map((s) => [s.id, true])) as Record<
-        string,
-        boolean
-      >
-  );
+  // Track which sections are expanded; default to false so they open on hover
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  function toggleSection(id: string) {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  function setSectionHovered(id: string, isHovered: boolean) {
+    setExpanded((prev) => ({ ...prev, [id]: isHovered }));
   }
 
   function isActiveLink(href: string) {
@@ -100,71 +99,79 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {section.label}
                 </Link>
               ) : (
-                <>
-                  {/* Collapsible section toggle */}
-                  <button
-                    type="button"
-                    onClick={() => toggleSection(section.id)}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                    aria-expanded={expanded[section.id]}
-                    aria-controls={`section-${section.id}`}
+                <div
+                  onMouseEnter={() => setSectionHovered(section.id, true)}
+                  onMouseLeave={() => setSectionHovered(section.id, false)}
+                >
+                  <Collapsible
+                    open={expanded[section.id] || false}
+                    onOpenChange={(isOpen) => setSectionHovered(section.id, isOpen)}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.8}
-                      className="h-5 w-5 shrink-0"
-                      aria-hidden="true"
+                    {/* Collapsible section toggle */}
+                    <CollapsibleTrigger
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d={section.icon}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                        className="h-5 w-5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d={section.icon}
+                        />
+                      </svg>
+                      <span className="flex-1 text-left">{section.label}</span>
+                      {/* Chevron */}
+                      <ChevronDown
+                        className={[
+                          "h-4 w-4 shrink-0 transition-transform duration-200",
+                          expanded[section.id] ? "rotate-180" : "",
+                        ].join(" ")}
+                        aria-hidden="true"
                       />
-                    </svg>
-                    <span className="flex-1 text-left">{section.label}</span>
-                    {/* Chevron */}
-                    <ChevronDown
-                      className={[
-                        "h-4 w-4 shrink-0 transition-transform duration-200",
-                        expanded[section.id] ? "rotate-180" : "",
-                      ].join(" ")}
-                      aria-hidden="true"
-                    />
-                  </button>
+                    </CollapsibleTrigger>
 
-                  {/* Sub-items */}
-                  <div
-                    id={`section-${section.id}`}
-                    className={[
-                      "overflow-hidden transition-all duration-200",
-                      expanded[section.id]
-                        ? "max-h-96 opacity-100"
-                        : "max-h-0 opacity-0",
-                    ].join(" ")}
-                  >
-                    <ul className="mt-0.5 space-y-0.5 pl-10">
-                      {section.items.map((item) => (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            onClick={onClose}
-                            className={[
-                              "block rounded-md px-3 py-2 text-sm transition-colors",
-                              isActiveLink(item.href)
-                                ? "bg-[#2563EB] text-white font-medium"
-                                : "text-white/65 hover:bg-white/10 hover:text-white",
-                            ].join(" ")}
-                          >
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
+                    {/* Sub-items */}
+                    <CollapsibleContent
+                      className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down"
+                    >
+                      <div
+                        id={`section-${section.id}`}
+                        className={[
+                          "transition-all duration-200",
+                          expanded[section.id]
+                            ? "opacity-100"
+                            : "opacity-0",
+                        ].join(" ")}
+                      >
+                        <ul className="mt-0.5 space-y-0.5 pl-10 pb-2">
+                          {section.items.map((item) => (
+                            <li key={item.href}>
+                              <Link
+                                href={item.href}
+                                onClick={onClose}
+                                className={[
+                                  "block rounded-md px-3 py-2 text-sm transition-colors",
+                                  isActiveLink(item.href)
+                                    ? "bg-[#2563EB] text-white font-medium"
+                                    : "text-white/65 hover:bg-white/10 hover:text-white",
+                                ].join(" ")}
+                              >
+                                {item.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
               )}
             </div>
           ))}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 
-// Each section has a title and a list of links
 const sections = [
   {
     title: "Trains",
@@ -32,14 +31,23 @@ const sections = [
 ];
 
 export default function Sidebar() {
-  // Track which sections are open (all closed by default)
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [hoveredSection, setHoveredSection] = useState<string | null>("Trains");
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
-  function toggleSection(title: string) {
-    setOpenSections((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
+  function handleMouseEnter(title: string) {
+    const timer = setTimeout(() => {
+      setHoveredSection(title);
+    }, 300); // hover delay time
+
+    setHoverTimer(timer);
+  }
+
+  function handleMouseLeave() {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer);
+    }
+
+    setHoveredSection(null);
   }
 
   return (
@@ -47,11 +55,11 @@ export default function Sidebar() {
       style={{
         width: "210px",
         minWidth: "210px",
+        minHeight: "100vh",
         backgroundColor: "#1E3A5F",
         padding: "8px 0",
       }}
     >
-      {/* Home link (no dropdown) */}
       <Link
         href="/"
         style={{
@@ -66,60 +74,66 @@ export default function Sidebar() {
         Home
       </Link>
 
-      {/* Collapsible sections */}
       {sections.map((section) => {
-        const isOpen = openSections[section.title] ?? false;
+        const isOpen = hoveredSection === section.title;
 
         return (
-          <div key={section.title}>
-            {/* Section toggle button */}
-            <button
-              onClick={() => toggleSection(section.title)}
+          <div
+            key={section.title}
+            onMouseEnter={() => handleMouseEnter(section.title)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 width: "100%",
                 padding: "10px 16px",
-                backgroundColor: "transparent",
-                border: "none",
                 color: "#93c5fd",
                 fontSize: "13px",
                 fontWeight: "bold",
-                textAlign: "left",
-                cursor: "pointer",
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
+                cursor: "pointer",
               }}
             >
               {section.title}
-              {/* Arrow icon */}
-              <span style={{ fontSize: "10px" }}>{isOpen ? "▲" : "▼"}</span>
-            </button>
+              <span style={{ fontSize: "10px" }}>
+                {isOpen ? "▲" : "▼"}
+              </span>
+            </div>
 
-            {/* Dropdown items */}
-            {isOpen && (
-              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-                {section.items.map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      style={{
-                        display: "block",
-                        padding: "7px 16px 7px 28px",
-                        color: "#e2e8f0",
-                        textDecoration: "none",
-                        fontSize: "13px",
-                        borderLeft: "2px solid #2563EB",
-                        marginLeft: "16px",
-                      }}
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                maxHeight: isOpen ? "200px" : "0px",
+                overflow: "hidden",
+                opacity: isOpen ? 1 : 0,
+                transition: "max-height 0.4s ease, opacity 0.3s ease",
+              }}
+            >
+              {section.items.map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    style={{
+                      display: "block",
+                      padding: "7px 16px 7px 28px",
+                      color: "#e2e8f0",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      borderLeft: "2px solid #2563EB",
+                      marginLeft: "16px",
+                    }}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         );
       })}

@@ -77,7 +77,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {navSections.map((section) => (
             <div key={section.id}>
               {/* Section header — if only one item (Home), render as direct link */}
-              {section.items.length === 1 ? (
+              {section.items.length === 1 && section.items[0] ? (
                 <Link
                   href={section.items[0].href}
                   onClick={onClose}

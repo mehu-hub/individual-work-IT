@@ -12,7 +12,7 @@ export default function HomePage() {
       <section className="relative w-full min-h-[88vh] flex items-center justify-center overflow-hidden">
         {/* Background image */}
         <Image
-          src="/train.jpg"
+          src="/hero_train.png"
           alt="LTG Link double-decker train at the station"
           fill
           priority

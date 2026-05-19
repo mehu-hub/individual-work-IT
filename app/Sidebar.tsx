@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // Each section has a title and a list of links
 const sections = [
@@ -51,7 +52,7 @@ export default function Sidebar() {
       }}
     >
       {/* Home link (no dropdown) */}
-      <a
+      <Link
         href="/"
         style={{
           display: "block",
@@ -63,7 +64,7 @@ export default function Sidebar() {
         }}
       >
         Home
-      </a>
+      </Link>
 
       {/* Collapsible sections */}
       {sections.map((section) => {

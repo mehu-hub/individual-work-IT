@@ -3,6 +3,7 @@ import "./globals.css";
 import Sidebar from "./Sidebar";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -23,9 +24,11 @@ export default function RootLayout({
         {/* Top navbar */}
         <header style={{ backgroundColor: "#006EFF", padding: "12px 24px", display: "flex", alignItems: "center", gap: "12px" }}>
           {/* Favicon icon */}
-          <img
+          <Image
             src="/favicon.ico"
             alt="Vilnius Train System icon"
+            width={24}
+            height={24}
             style={{ width: "24px", height: "24px" }}
           />
           <h1 style={{ color: "white", margin: 0, fontSize: "20px" }}>
